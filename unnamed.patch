@@ -1,0 +1,395 @@
+Index: filme/forms.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/filme/forms.py b/filme/forms.py
+--- a/filme/forms.py	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/filme/forms.py	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -2,6 +2,10 @@
+ from .models import Usuario
+ from django import forms
+ 
++class FormHomepage(forms.Form):
++    email = forms.EmailField(label=False)
++
++
+ class CriarContaForm(UserCreationForm):
+     email = forms.EmailField()
+ 
+Index: filme/templates/editarperfil.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/filme/templates/editarperfil.html b/filme/templates/editarperfil.html
+--- a/filme/templates/editarperfil.html	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/filme/templates/editarperfil.html	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -1,10 +1,37 @@
+ {% extends 'base.html' %}
+ {% load static %}
++{% load crispy_forms_tags %}
+ 
+ {% block titulo %}
+ Editar Perfil
+ {% endblock %}
+ 
+ {% block content %}
+-    Editar Perfil do usuário
++
++     <header class="min-h-screen bg-black bg-opacity-75 bg-blend-overlay showcase border-gray-600 border-b-8 flex justify-center items-center bg-no-repeat"  style="background-image: url('{% static 'images/background_netflix.png' %}');">
++        <div class="z-10 h-full py-32 md:py-0 text-gray-100 text-center flex items-center flex-col">
++            <h2 class="text-2xl">{{ user.username }}</h2>
++            <form method="post">
++               {% csrf_token %}
++                <fieldset class="form-group">
++                    <legend class="border-bottom mb-4">Edite os campos abaixo para editar seu perfil</legend>
++                  {{ form|crispy }}
++                </fieldset>
++                <button class="bg-blue-600 py-1 px-3 text-white md:text-lg rounded-md" type="submit">Editar Perfil</button>
++            </form>
++            <small><a href="{% url 'filme:mudarsenha' %}">Quer mudar sua senha?</a></small>
++        </div>
++    </header>
++
++    <footer class=" px-5 py-10 ">
++        <ul class="flex justify-between items-center">
++
++            <li>&copy; 2022</li>
++            <li> Feito com Python (Django)</li>
++            <li>Enfermarky</li>
++        </ul>
++    </footer>
++
++
++
+ {% endblock %}
+\ No newline at end of file
+Index: filme/templates/homepage.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/filme/templates/homepage.html b/filme/templates/homepage.html
+--- a/filme/templates/homepage.html	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/filme/templates/homepage.html	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -1,10 +1,21 @@
+ {% extends 'base.html' %}
+ {% load static %}
+ 
++
+ {% block titulo %}
+ HomePage Enfermaky
+ {% endblock %}
+ 
++{% block head %}
++<style>
++    #id_email{
++    width: 100%;
++    color: #000000;
++    padding: 5px 5px;
++    }
++</style>
++{% endblock %}
++
+ {% block content %}
+ <header class="min-h-screen bg-black bg-opacity-75 bg-blend-overlay showcase border-gray-600 border-b-8 flex justify-center items-center bg-no-repeat"  style="background-image: url('{% static 'images/background_netflix.png' %}');">
+         <div class="z-10 h-full py-32 md:py-0 text-gray-100 text-center flex items-center flex-col">
+@@ -22,8 +33,9 @@
+             <div class="w-full flex justify-center">
+                 <div class="flex justify-center items-center w-11/12 md:w-10/12">
+                     <form method="post" class="w-6/12 justify-center">
++                        {% csrf_token %}
+                         <div class="flex flex-grow items-stretch">
+-                            <input>
++                            {{ form }}
+                         <button class="bg-blue-600 font-medium md:font-normal flex justify-center items-center py-2 px-3 md:px-0 rounded-br-sm rounded-tr-sm md:text-2xl" type="submit">
+                             <span>
+                                 Acessar
+Index: filme/templates/pesquisa.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/filme/templates/pesquisa.html b/filme/templates/pesquisa.html
+--- a/filme/templates/pesquisa.html	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/filme/templates/pesquisa.html	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -17,7 +17,7 @@
+                 <div class="flex flex-wrap items-center min-w-full movie_lis">
+                     {% for filme in object_list %}
+                     <div class="m-4 bg-blue-500 overflow-hidden flex-shrink-0 rounded-md cursor-pointer h-64 w-96">
+-                        <a href="{{ object.id }}">
++                        <a href="{{ filme.pk }}">
+                             <img src="{{ filme.thumb.url }}" class="object-cover w-full h-full " alt="">
+                         </a>
+                         </div>
+Index: filme/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/filme/urls.py b/filme/urls.py
+--- a/filme/urls.py	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/filme/urls.py	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -1,6 +1,6 @@
+ # url - view - template
+ 
+-from django.urls import path, include
++from django.urls import path, reverse_lazy
+ from .views import Homefilmes, Homepage, Detalhesfilme, Pesquisafilme, Paginaperfil, Criarconta
+ from django.contrib.auth import views as auth_view
+ 
+@@ -13,7 +13,9 @@
+     path('pesquisa/', Pesquisafilme.as_view(), name='pesquisafilme'),
+     path('login/', auth_view.LoginView.as_view(template_name='login.html'), name='login'),
+     path('logout/', auth_view.LogoutView.as_view(template_name='logout.html'), name='logout'),
+-    path('editarperfil/', Paginaperfil.as_view(), name='editarperfil'),
++    path('editarperfil/<int:pk>', Paginaperfil.as_view(), name='editarperfil'),
+     path('criarconta/', Criarconta.as_view(), name='criarconta'),
++    path('mudarsenha/', auth_view.PasswordChangeView.as_view(template_name='editarperfil.html',
++                                                            success_url=reverse_lazy('filme:homefilmes')), name='mudarsenha'),
+ 
+ ]
+\ No newline at end of file
+Index: filme/views.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/filme/views.py b/filme/views.py
+--- a/filme/views.py	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/filme/views.py	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -1,12 +1,13 @@
+ from django.shortcuts import render, redirect, reverse
+-from .models import Filme
+-from django.views.generic import TemplateView, ListView, DetailView, FormView
++from .models import Filme, Usuario
++from django.views.generic import TemplateView, ListView, DetailView, FormView, UpdateView
+ from django.contrib.auth.mixins import LoginRequiredMixin
+-from .forms import CriarContaForm
++from .forms import CriarContaForm, FormHomepage
+ 
+ 
+-class Homepage(TemplateView):
++class Homepage(FormView):
+     template_name = "homepage.html"
++    form_class = FormHomepage
+ 
+     def get(self, request, *args, **kwargs):
+         if request.user.is_authenticated: # usuario esta autenticado:
+@@ -15,6 +16,14 @@
+         else:
+             return super().get(request, *args, **kwargs)  # redireciona o usuario para a url final
+ 
++    def get_success_url(self):
++        email = self.request.POST.get("email")
++        usuarios = Usuario.objects.filter(email=email)
++        if usuarios:
++            return reverse('filme:login')
++        else:
++            return reverse('filme:criarconta')
++
+ 
+ class Homefilmes(LoginRequiredMixin, ListView):
+     template_name = "homefilmes.html"
+@@ -40,6 +49,7 @@
+         return super(Detalhesfilme, self).get(request, *args, **kwargs) # redireciona o usuario para a url final
+ 
+ 
++
+     def get_context_data(self, **kwargs):
+         context = super(Detalhesfilme, self).get_context_data(**kwargs)
+         # filtrar a minha tabela de filmes pegando os filmes cujo categoria é igual a categoria do filme da página (object)
+@@ -63,8 +73,15 @@
+         else:
+             return None
+ 
+-class Paginaperfil(LoginRequiredMixin, TemplateView):
++class Paginaperfil(LoginRequiredMixin, UpdateView):
+     template_name = "editarperfil.html"
++    model = Usuario
++    fields = ['first_name', 'last_name', 'email']
++
++    def get_success_url(self):
++        return reverse('filme:homefilmes')
++
++
+ 
+ class Criarconta(FormView):
+     template_name = "criarconta.html"
+Index: templates/navbar.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/templates/navbar.html b/templates/navbar.html
+--- a/templates/navbar.html	(revision 4fd195d58c6237016c8fe86a814b3a860fa2864e)
++++ b/templates/navbar.html	(revision 3950513f512f754838d9138d5aafa4e1487ca93d)
+@@ -34,7 +34,7 @@
+         </div>
+     {% if user.is_authenticated %}
+         <div class="mr-2">
+-            <a href="{% url 'filme:editarperfil' %}">
++            <a href="{% url 'filme:editarperfil' user.pk %}">
+                 <button class="bg-blue-600 text-white py-1 px-3 rounded-md">
+                   Editar Perfil
+                 </button>
+diff --git a/db.sqlite3 b/db.sqlite3
+index e1737f2ff0ae3ce01c8604c1a8e524e8701b3491..f2ad540f03dce4887df74310b5ba8e9edd486230
+GIT binary patch
+literal 159744
+zc%1E>3v44vdYIYbdnB?oujS6p&TJ1ga~fJBso8vMvv<ppI9jeG>b*0X!=%w<m#Ef|
+zY)*GmGurh9p?2bRf*8&VL5%o;gJB$OCqaBkZjmz#1Q<B6y+8sRF#^ZuO)idK2XCBg
+z94~Tv22xdQlFf%CYI2L&8~h(;O025C{`%{$s%BSLskOeks2GUbR<*KZa1q<6jbUuB
+zbDYg)dmsNFx3v-Qe}^T`*pBCY+tl(`oJ5%Yl*C_PKV|>I`)&6_*RQ)qJpX!R!HI_7
+z_dIq8_R9<!{$bA#51{i0k9Xq%cVK*+`H=}j%9qf#QYs^{rq?7*Q9B~1XV)_6jSRPu
+zzPXs;f*pB5?s`y>gPc+^P!VZdZh3>tZ7wcyD{I-M^x77;klEtWn;Xm79M-aw$!*-=
+zf>lY^AF3KIwkK(Y9Z9<$7LuV>Su9bKbVDquMWqttWXV8=Qbx@@MHls26=^jcX+bWp
+zswHbll3J0<$f7&Ow{>%yx$Np@<_2kohU+*&v}wlCBB(4WrFOOui*{raV-0D0yVp>h
+zBNYr~5A|k|7K^*8QbDq{`KCbV;PeabKq$n#d(YBwsH*6y-0Zn#%+s&ynwd}4cZOor
+zN~*;le5XJ56d75vg|6&|1*F!zf_v9!SGtzDm08Q=W;5$eDH@tahPXMBzed}U&1E;T
+z>BYq@Gchw4I^fT{17l;%<8g~mXlVK9?&l3_EhluvPOY3j+!M!nN=AA?QwkCmG0-E!
+znpMDkUQ{(jI(*#iDR=^wl((gViu7K?8>2`PaSal!qIVe8uby!S?oBZDC8Z*xM^eq$
+z5%IJtE4r?z6|taVl@&uY_N%1BL}5Fch@)t}OYW5E(`;@obB7BKswK!R=X#_`FLV_M
+zhUzn{J5Wq9b*XJ;QB!MGOF`XQC9WkIEyM~b0reO5_c3`;jTXCmiV*WVN@3$C{Mg5-
+z4j=bc)kwj$<ii4A$Zx0m%lQVfyGPk^CN~RUYj=H~K;52V4#oyDx6?&@L5>KqJTKNN
+z%7gwzN6Z#9F2aL0<cMkpZX5a5>Fk<e!N#?R|7+)5fz=7drc_)PT=eTPf>Y+NkQD3*
+z{Xq%ekchY<mBvL&mErd1(SvKF?!d$Z^O&KRp|0`W6=gdwM|~#4i7!drv!}PT^)f5(
+zN|mD8F-Hfx+|rt4)b-8Sb$#p16=JcF<tr?A${k3hn8%5>pL#m5f2y~S*ZTJTiJjLP
+zEJu5-UE{#c>Ku9lsP7pD$9@0#{?ztn;K~)Ie!t71?N9E*9M|cr)Qhgb()eNHzT@Uk
+z40lA&)K8yvQzOcU8ZkVW5d-$v@i%&*`ub^iV1I%+U<dk^YYuCX4@>z-A||!3X6;hW
+z!!KheRz2_+p>@uM>TkH*0X4$Z-=VGQGm%B9S`|xD9+kv0E>;o~@w^<7BY9eDp8}4)
+zjXJUBMtcsqvb0K)*3iPi5WdvD6o^EagT|o2C0(P9D{wvQbkm$vGpAc;pCni306Y8=
+zce0Vzw*1iRU86nyvqLLGF7mywMO$LdDjhwjp-Q1UYVT-4SLSun|2J?fRNrFUf$3@H
+zK(czLtQ0lLAeX?NgrUBkY3Dz!Uk<s(AN>u`C|XjiD;(VA&M_REyWk_?sSj=Jzhl3`
+zF0w=ZU-7@=Px$`a_cfpBdtu}^M}B-HGjewL+rvLSygqyx3jzQD00000z~`1Po^#p)
+z=`>wC^E@wzQprG?xwLLQ`W1LVm<;oi;RF{>%n0F`2tO4O_!J+BoORkRT}$hz@vH-@
+z2#ZQZF%+p}Efk#z$7lH16rV^YlYI6JuJm?VlFLd3mxz$v6}%$S_C-mS=}rV*vTm28
+zqFC5b6}%|vt11?cMZ@XSSk-(>mC#nDp|ZNycw9i#_Eiyy#*!(16sx$_QgO8Xd^jA5
+z^DHgVblMRmqEo3PpNNOw@H=hiaf|WN8p}7mO!kMw_TG<JmL7>ER4E!eeKo~m@l@n>
+zAJ#PA)D#wLRk}k{)znA()~8N=HAJxnVRi&-SZZqEO<NidoCYx?5={ug{4iFsX)57U
+z)&{jUs*Y162#Hwq)+wxLy{RZ^Rn*)*J5EnnNF@0MFV=IfsV8CT*^^2N_K&LRbZ8+>
+zQ#G-S2dh-<H>$8QY(rQ`d$6)>Q&}93r3W=dL(Qc-S-I;X8E*YlB$KIRRJiHJDi)e5
+zVm%I`8;WA3R_Z%yl1U*M=U;bO`kIgS^^ICJ`Zgq)2xCKLotD1F6V0N5ZWbQn+GISO
+z3di4YSO#zF5@C6|G(aaMV>}*x({`-sT2s@J^ClTdrV@!ahMcx*^J%N!sR`!f?sybL
+ztmvyLoWv77!C+0-x-}hb0w3iQVY2@BvNKNhm)SpJ57>XgewqDk_5nM?{=~Dsb^`za
+z000000002M=Ydx|_F1O$kPeOM;+~=#s(#~~(>}?Vd;j$D8+j_?W!?5M#&RCkdDd>9
+zV7gAFa5md%uRY}LJVoqt*spln=XlOD_GzZ)Y{5Bf+NjGu?(HxwFl3J~eNJe2PGNBm
+zE8E!r!G6I0XZD}5d+gt2Wmx?K00000000000KiE(?Fd|KEcwmVxaW)`aH)~fT-&=@
+zM<Bqoe~s34&T;7?(>!=&{&c?VxHiUEH~B4}9e&680DX`^pAOj1I?i9A(e`77A#BMd
+zFMSr#JV->=|D12%#{L;z{r@Wab@r#&zrmK-+w43WWv{TK{_py~?f*6ZFZqAQ|F`@#
+zf8M|5|C0ZP|DxaH``Gs_->><;;rpuZZ({`j0000000000K!46Sm}`t@PeBixd$im+
+z2NPmEGAbdXwQ>7OBeAd}Rf?^|%cmX87~>&l{>_w2XC2Hq<EHAGOUjqeJD3T^ZR%^L
+zUTmbA3Y)1fQFGk%w+PIn3!@I^3ge<G>5}wCD&sQs(WF2l$y7#@USJ)}D~yY1qVe-o
+z#7Whd%h+?YO-@shnRvF5XsR+3&(MZCi83?g^a~DVl5tRVmc{Sriw-8tI82q647QPB
+zs<mYJsUI9fwI$U@8*QiR=`wnRnr}B1H(spKNHSH@q*JufcA|{Ny;S)SRnuO6djbw-
+zni(>6wbR{=bW>qF-9=q8M6_Doh;hc@9cQTK<{I8{&f%S4OtsBKJ54loHWP<N9o}nR
+zqOh4l&i{MZf{p!%{T=o<*ni6YBlbtx8cqNJ00000000000N^BydK|XEMeF|mX*W)}
+z)Up5Xcj2T!d;kBe(_y=Gv1|YTqQhakHg?GVzt8Tloe#A3|IZBJ=#|d>|I-Yqw`2d`
+z=li!d$M7e%;ZOX3m)#ioRsSGw^#=d|000000N@9S`U2y%tuNJYUtl8ikL#GfyF6XS
+zs{%=pC7J9ECpNdY=BIY6#d)L~PkvVA5LYcp6|^f6F&r&(>(Y~N%4oKx=_*%H%heLX
+z=`xnnluALVN{Y@Is4VGRRnjC*%Bz|z6>&KlRr3bYxLR4_(4zt>VV#I8npIUK?#Wj*
+zByqCD>9msh%=$)p+1vHD#>h-8QvYj?Q?^X~LjCrax|(xeD({yTrMX)IZU!pOAstor
+z)Y6{PXaF@--NiQRq-{ulP*ZelEN%&>a^)vKZ>X|5!_DIbRYgWJx3Pm%ZU6hDg`3<!
+z<n5E(Eu2anD&eM9u#P!NR`t2eTjE?sTv=OwGqbTQ;!m0N)y?dBdbG;{i5WhId-Ma_
+z!h)Lhb~c|lQ&PopL5e-v(@0OQnAVZLLzQi$)qPHnZEL#LJrGa@X+=evL~2PXNRxU&
+zDj}I@SkB{~(~*WlS>={ci6&roQ2Qm~3c2>=YorgcV@x$1dh#!b9%)_D)9aGl=u2m-
+zDM>CIp9v>tgn0e+A+K$DweDN$Hb|}&$RAh|S5_AG-=3SDs#b~_lGdne1+Q}P&?G|$
+zakF??tW;{)pstZgy5z|(RJJ7@Q4h4sSFPm>t@4?<&Dr#9dKtTaZ7H40<Tf(6FJ_l>
+z8`<1udM@qk>W%13BvlXDJ+wEN6Zb}$P7Y*__%7qgv^ly!bBu_YB{7q`MNFP2AI0_b
+z=3M4fm#r~uE7||IjoNJNKexG`@ihqm00000000000Dv|t3nG)L>?w^0Pm-Z2Wwp|X
+z<x~UZRrUUkVN~^*>FI|LA5QJ7HKUeCQw6m=jmmi>PfKf=m~wL~^Dw45o9ll700000
+z00000005p}===ZJjE(&s`w9Co`w{y`?6=w9Wq+If5A3hAPuO2!-)Db`{YCcY*q>p4
+zg8lpKkFoEub@m;$#;UBs7TA02ZFZGizzP5W0000000000;CaVsXBZDh!&hi{nTD50
+z=zf`o7ists4KI+;^&$-eG<<=E=Sk>1N5iu;JVV3NBy^0@kfouYhCUM7M`$=q!&5Z$
+zl5ogFLpKdwG;})bUdBNJI|+vDcCXj6|4$wTIG?2(0RR91000000002^Y#@t%IR6g-
+z00000000000M9qD{s#a6000000001h=O0-A0{{R300000006-A5BdFnZkV^R-(tVc
+z{wSMgXV?+{hyH)*|A&6fpYu=o?Y`ggebs09)_gzY8yfj=<ll_^<jA9uJ0sDNQ^Wst
+z_?yH3czADk6)OM$000000D$L^S2(AQxi;?EQ_w@Prq?7*QD>zJN8(&fN7~pcSRgdv
+zkx>a5$STrEX$W0z2o-juO0h$zkwS$oUBW_R*F2IeTP1LmW?y|7XOB<2sU@hY=&Ecn
+zrI~R3B9@wnxJ`4ca;7~k$(I_ErcG8!)2L=r@B;C{q?;IK6(g24<CkB=GFL(_Y90Oi
+z=PlD{EEu3VT&7(u3Dc;C%nJ<})1sD)X%3CQd>+fZGVUU_v;>GD4Grh01}C*bN4l=4
+zm6jc5{0nDEUxb~eB^D{umZsd9hMZ}QMb5OxOyN$GZkuoti!4IKCNnxQiX|o!4r&$o
+zQ}d`|82i<>hs-pNBu=wfIQ*)^G_OnCG_j+Azfr)nv#Wq<tF=JLM>;;{AO?3y6Qix7
+zmq%!?+NtG5O|4a1Hq%&enEKmp8rzaE&1}e=YRH)OwPZ}oX#8a_?NvK5sU<*+p^@tz
+zI#P$I6;-5_mClZBC*5#k$?3$9X-}uDX_Q6U)sQwV>y$RlYbSoeNyozwv9VK>7}`#`
+z>Tue;<6&xSNiAYmYWpoyaRNtEuG_KHM9ehQDrcJ6mK>szrjb@j)5Ml!kinAIrip=8
+zF=Adz2KN5}00000000000O0wD?Ef?DYc~830000000000004k)e#2IOt^PXW!#~pA
+zSAD)$z1~PQe_!4fM14mRV)3hy6py)@xtpHP=hq8+)jN^w?R++W^S1KF!qvOU2P@On
+zLZ<p=SqM+(mv-+)@2~9{v323Dq#9~%9qlbIynTN|)AiQ`UJxe3;YmKqg;O(OeufWE
+zr4j-kiQJdU`=yek7iyIq>Gfh+Qc6<=wR}i&Lk~Y0PH^Gq3|18lll^~&{R12R2LJ#7
+z000000002M4>B*=U-cgHNPz7BJIMO~|FZv^{ZsZ2*bkqzu>b%70000000000oEW#4
+zaXP&Yo0l1KI>-;ZV+jB7IvEmikoEr=+mGAWtN!2eyL_(>f9KR+o?7<)J<qQDAGkhp
+zZMm*G{+IpthORPyf`#7uEDiOL;NbQJcVKpwc^osOd<oH)cr;&r(s;jzF77G1q3TCu
+zot<6Fq&G6$M*8Mrh6^4c8RV`96*<T$6$2HK#^shbxZLLABDb=ZT}rQQaSNF(F1@+2
+zoXugKOPSop4KCQ!L<;7WA}-r5x0bn;S<B>RGwWUTnl**EIU=z}Ez9Pz8`<>Y;+C11
+znY+;}HJI+kJ5C1D97?_D3M`E?Hl-q?NBV=3Vjxkf87hs7ojwY8M9;h%54Z#4<IImt
+z^ma-|<n$4ae=1j3C0&20YPi^*q!o4~?Rr>9hFWE@L`l*O@^%ZQ669pbK!#FA%{)aH
+z^;#8a<ZU_FovK>0mL#baiTJOjJI1$lbDO#B>Sl)ah=%JpLbPed(ISXEa%*P`v1ms&
+zG1ic_w|fo6Ia0w;_E2vYX|cGA`w+?2=9>bcgVQg#1ECP}?mbJ#HQ&(F8T0h(y4DMS
+zo~G{%#i*53i$C~If9xqTvSbTg*`L)sIN;B_17l;%<8g~mXlVK9?&l3_EhluvPOY3j
+z+!M!nN=AA?QwkCmG0-E!npMDkUQ{(jI(*#WD_u=0DQ`;!73sZ(H%5^p;u<7cMei_*
+zoO1={uN-#iz@K&+FX<7(?a!n2(`Vg*D_59$nfke%)BZHv>E(9DQ#twgxg4rrJ>w4C
+zn_%io)O1>5`$av?mmi7bO-Fd-iNba?5l7K{m)t4S>}+l>bH_A$04+goIoBgiTG~}0
+z7^<(Ib_ez+m;-hoGYhJWNaIC5EafAKm?YLJ%7d;_PSfayCkC~>zv_WoLI$X*As9Ni
+zHtG&cOfZj`_JC*??~1a0hDK*yCmtW&#`TuAURdN^sZvxs95V1%c&p8a&gjluAr@=r
+zhUzn{J5Wq9b*bI^jp@~PfNt$H+)v49Ay!BUsK2nk&ww3NqouEViV%l%l)^)I!jETI
+zs$+)rR@F$swdBJBU&wE#`pfwSvb#swaV9qlU~6}Mo<QB6Vh+XzGPl!3d_j%~u{__N
+zZaqau4xe>TSIxj}BR5Z-U2~8-<qo7$%;QAY1=*^jf2#Me3w3w(C!Ulodyk%tJzovS
+zPr}aD51_v1@^ajrMEwnyJD^6G`a5*+^tob)Qnf0Uq&zB#WqeI2iHUe#j>wTb?aMv|
+z9DT>ji8VJy$sw1pR!K5OXkk1NvQBp(5@8NfbZqn~*(b@>IVujnVxDYBwCy|e^4YMu
+ze|BhP$VI+pwrEStyA>ThsG&-sJ8JJ}L09H=a*@7)W1;#M;|@$uGY68@J7uM)Nd_7D
+zJqbg7J=4yATE86fm2vbJN~35=>AyrE>wkFv9{>OV000000000y-}t;A+s@c(jQbm|
+ztn-&0Pwb!CQ$v51`8qS=|HyyA_g99Kr+&=)UC;Nt|H@W-stQj19osJk#7U;U+I~t_
+zKR4wLtcRF-%KGHY{OcGZdQ??3B+|W2DOQLJ@pz<DWW4ji@BrmIo`{)(<SC3rHW;dp
+z1>J$I7*o$svpV<0>C;EcLs~hS-<As7seV$IJM9}xQNzT3vRx0YLs#5^d$Hyt_P)y7
+zM-)Ush(xgm<bHCO2C%b_s-rEn9FGXq?{MzGeyq8ZbzBAQNBO)Q-p&^y^l4_lQZM&?
+zQ2KQG2X2n_d3C7%rB~d6;%sx9=7>WkVsk57%u9uMMB-CN2wyy^OO8?7uOU6hU0VC<
+zp?c=BJ8&PjKsmMr79UE2fD)1rJwp7Y!Q0SB@j$KU7-Y3eo<Q9_%N$Icq#-T$MYmJ&
+zZ2|Fp23tqr3j>U~6V`Upwp!0cgzCdDy8}!3DmrOtcJs(ayFy7wY)cW;b^7DQetmR!
+zVXL9mQz30@4t6iP1KBL|c)8EXEppbzx>s~`Zs4f%TiwE+!y{au{npdL&6nJPSgi99
+zOXsz#U)uSj9NWI+ea_tZ8SN2<y!H4EdOYf2+`6x0-W_ztuJ+y0vD`>BZ$9p${q{ag
+z)OrTR;y~P}raU=&(|fGPdRx+G)8^GlS714G*nym`+o5o0{0lbosAYY0!W~$~H)dh$
+zO_(H?l?pjf*O+MJ3`i^<MR_USEil&iChYL?9k*aDvBm|CO5!Wp^&fI~-z!>G_8d=%
+z<_jo^@;yqAG3_uthnv`QM&~gTat9_SnfGGWvC}Hk9lzFh{B%@t;#sHWcTvHh6QePH
+z8e_*y)=*VD{B#{TP>9FIc1gl@>t(4_B9pdO(UoEa$?f`Q-^k1^kWFK&{1;#2_z*eg
+z()bf(_}faCim1=wv_ntad_PayG)K>8aOE*uO(tKzX;{B|%^i4{We%7=_Z{8eQ(dPz
+z;wZ7rM-$1T3tc(tPHMm!`rTvn`x5Ow$+LRZ9e9vs>a{@{XSvhKOW|lC5s4gKf;&;m
+z`luhYS=KwngV8a3rx?IJws68mb-GrHCr~&NiTAl<>{jy105^?KS@BbNp!ZY|?EeD*
+z0000000000!1E7z|36v(v!6a|O8@`>0000000000_-t@G$@<^H{-KTibM_C}kJ#_B
+z|K(ZR1ONa4000000002M$#FBzfXm@!m?1CyVRtwkUi#Mnyo}e;SpR=yW536K!hXzt
+z#QyQKwif^Z0000000000fd3Di0f(I|`ElSN!I0hV^)}Z3-?6cO!G4GRpX{gXe}C3y
+z0ssI2000000002+l(?J$r=1)DAfdgn{CC*R{eO7>9{>OV000000000y-@y7G00000
+z00000005qUVEqpO00000000000M9?L{s#a6000000001h=O0-A0{{R300000006-A
+z53K(I00000000000O0wDtpC022R8Oo_W!Vd#{LQWd+cwrAF%(4{rzWc82|tP00000
+z00000eIS3@&qe>hpUXo+x0`-;k<jC$pB*%`(~$oCKUZV@{~vAa_t;O^kJ*pdKW2ZQ
+z{gC|~oCE*>0000000000z~>l;-OG4M;30vV1TGRdN#G!XodiR6yVvW(@<YCF*!;hX
+z0{{R300000007`~#zAn%x%BROT8?b1rF^x#vn@P$P^jGx^GXp(4|l6YDHca+VG6zZ
+z=&jvMX8EC#-n@y#Sz%|kSY2Dcli20wCb!d*Mp-Q`pvVGxLpFHzty(0xpDaC8c<rr~
+zt$8K2v$I=VT-=O{x8oapbTK;@S*R2q+}{stOL`$DC9=i0@5VGVSBc%36X%q>5BP*!
+z-np;cE#}s@mP(bhY-n?<+vP{ew;$wJYTGyG`PHp*#Ms}O+bZju*_EoyukPL15z{x(
+z<nqeuOjy-~Xk{ibznD$WtIFM7bZc*IuU3BaNZgiWVLkR}zWP@At#xrh-O}G&O7WWl
+zF9?(2@MJj2g;O(OeufWEr4p%_5IG1k)Jf7VD(}~J<250wKde>4_xb%utXA9S%i4Wm
+z7a2c*PAchhv6(eB&L{F~8*i;WylL#ItGDJh=lAEL#XU{jOvjhzcUQ`rr7*u*iRw)!
+z@lh@unTaH3!m+7%B$f!r$ok(q@_~*01$NE<m;S%*KkxhZKIC)YBme*a000000D#Xc
+z39r}2PBT8nn~p8#HHp)ahC^B9mQcy=YOH~Hx=>8aL{c-+*p!e+CSzgILkr&PTX5*h
+z?*t1wQl*IG;0*Upa9cqoS;rs09GpXXK~oBn8oc+FuiWdXAU+d`&j{hENF*LfMv87+
+zf$p8a6@+^#;3m0DWlvE#8F5v~(3G-TX~c4>f%2+)A6p>Fa-)7+k-M`ZAvqI{ObIDI
+z&hr@;X$h^Uw<TR_y6nY^XCXc%@X=T#sW`EkR~ba?y)TvbOC?D!)G9mD>&3F9l%@)5
+z`3Se%Qc7i{b9;(zs5*6xr&U#g_+G%iPfaCL;b=7aj^mV#tzV!fN3lauWlt^bDP>eK
+z8XnP9yhK-Z4u3@YgPNjCI*04$RIdEw=M7a>XSjJytyOTtxQ!j8YWs(_vr%~x_x)5n
+zn&gwhx*fN3fz};aF|~83%%RFQ(#leieB^ZL$v0(mjMDf_EHV{~#8P45ts$&*l`0i7
+za;+de`P!48Rk;<Sv4We0u+CYvVkniGBumHWjp1=LB}5~9G_}ECy-STjG>>$HD8)`G
+zVWqoL!(Z6m^+BwS%)}B?$yi*7hRON=A@+S6`z;*UY-9L;@EOlz000000D#Yk$D<*4
+zAdz6+`;sB$OQ?b#ilV%W?`Ty~lFLd(EUCr5iPvV=GU<&Bw~@ZNnBjtbWrE!Gpdtr3
+z1>f%#k;dhgH@Mv9;v%=QmR(A(ZE*{kEiS#ev7F6eZA+Ql#tkm0=66xS5J@=$Ju+y4
+zcCv=5T9Dh5G<@5wT^D#h)Y6KDq=KQS6>+;H;kxy*R4U=Bxmrb6a3kb){j+amW*4w=
+z9r9m%jpIXDN#llI#CPvHzWHrh(XOO`Z(H$=rfBR}k=W5ZqIxZJE3=l#&1TlQpy>~5
+z0n;TRZjQ*UQRiiI*^O*^adFE`%*^3hYIxB?wda*0X++C*YX#e6ks;RfnxrY}z^ctw
+z8+d&Y<YdV}<WsAHP<`~eJFq;-)WZs1Pdw`GRME6dEX3kbl$YY&0$0tEk<HCz?zEh6
+zc=;f=oa+@Mt!eroRKGs%4v5&K)&3@Rb%|Jr<_jo^^4)@C$C!4Qp2JP-9t<J8kZ=Sh
+zCz<zRbV7BP>Cw?SjlM54=;;21DfU@Uu~7Z)HFw})mN{VPaP3gh82(kf4pwv>dq%f>
+zCPOZc65D(<kvzK4mCk|uR5dgP_0dI1gF8y&xwv}O9e9vs>a{@{*UZ56=B047kcdQ%
+zF2S9kWmoM>%yEZ5hQ{nm-s28GG}ix5Z0vu-0RR910000000000pI0v1)6C(&1u=BV
+Lp7tJo{{R00X|-!W
+
